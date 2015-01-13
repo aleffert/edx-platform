@@ -111,6 +111,7 @@ class CertificatesInstructorDashTest(SharedModuleStoreTestCase):
         self.course.save()
         self.store.update_item(self.course, self.global_staff.id)  # pylint: disable=no-member
         self.client.login(username=self.global_staff.username, password="test")
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         response = self.client.get(self.url)
         self.assertContains(response, 'Enable Student-Generated Certificates')
         self.assertContains(response, 'enable-certificates-submit')
@@ -127,6 +128,7 @@ class CertificatesInstructorDashTest(SharedModuleStoreTestCase):
         self.course.save()
         self.store.update_item(self.course, self.global_staff.id)  # pylint: disable=no-member
         self.client.login(username=self.global_staff.username, password="test")
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         response = self.client.get(self.url)
         self.assertContains(response, 'Enable Student-Generated Certificates')
         self.assertContains(response, 'enable-certificates-submit')
@@ -135,6 +137,7 @@ class CertificatesInstructorDashTest(SharedModuleStoreTestCase):
 
     def _assert_certificates_visible(self, is_visible):
         """Check that the certificates section is visible on the instructor dash. """
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         response = self.client.get(self.url)
         if is_visible:
             self.assertContains(response, "Student-Generated Certificates")
@@ -161,6 +164,7 @@ class CertificatesInstructorDashTest(SharedModuleStoreTestCase):
 
     def _assert_certificate_status(self, cert_name, expected_status):
         """Check the certificate status display on the instructor dash. """
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         response = self.client.get(self.url)
 
         if expected_status == 'started':
@@ -177,6 +181,7 @@ class CertificatesInstructorDashTest(SharedModuleStoreTestCase):
 
     def _assert_enable_certs_button_is_disabled(self):
         """Check that the "enable student-generated certificates" button is disabled. """
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         response = self.client.get(self.url)
         expected_html = '<button class="is-disabled" disabled>Enable Student-Generated Certificates</button>'
         self.assertContains(response, expected_html)
@@ -227,16 +232,19 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
 
         # Instructors do not have access
         self.client.login(username=self.instructor.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
 
         # Global staff have access
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
 
     def test_generate_example_certificates(self):
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse(
             'generate_example_certificates',
             kwargs={'course_id': unicode(self.course.id)}
@@ -255,6 +263,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
     @ddt.data(True, False)
     def test_enable_certificate_generation(self, is_enabled):
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse(
             'enable_certificate_generation',
             kwargs={'course_id': unicode(self.course.id)}
@@ -303,6 +312,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         valid course key
         """
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse(
             'start_certificate_generation',
             kwargs={'course_id': unicode(self.course.id)}
@@ -320,6 +330,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         when called with valid course key and certificate exception data
         """
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse(
             'create_certificate_exception',
             kwargs={'course_id': unicode(self.course.id), 'white_list_student': ''}
@@ -356,6 +367,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         self.certificate_exception_data[0].update({'user_name': invalid_user})
 
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse(
             'create_certificate_exception',
             kwargs={'course_id': unicode(self.course.id), 'white_list_student': ''}
@@ -387,6 +399,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         self.certificate_exception_data[0].update({'user_name': '', 'user_email': ''})
 
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse(
             'create_certificate_exception',
             kwargs={'course_id': unicode(self.course.id), 'white_list_student': ''}
@@ -417,6 +430,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         """
 
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse(
             'create_certificate_exception',
             kwargs={'course_id': unicode(self.course.id), 'white_list_student': ''}
@@ -456,7 +470,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
         """
 
         self.client.login(username=self.global_staff.username, password='test')
-
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url_course1 = reverse(
             'create_certificate_exception',
             kwargs={'course_id': unicode(self.course.id), 'white_list_student': ''}
@@ -504,6 +518,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
 
         # Login the client and access the url with 'certificate_statuses'
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse('start_certificate_regeneration', kwargs={'course_id': unicode(self.course.id)})
         response = self.client.post(url, data={'certificate_statuses': [CertificateStatuses.downloadable]})
 
@@ -539,6 +554,7 @@ class CertificatesInstructorApiTest(SharedModuleStoreTestCase):
 
         # Login the client and access the url without 'certificate_statuses'
         self.client.login(username=self.global_staff.username, password='test')
+        self.grant_sudo_access(unicode(self.course.id), 'test')
         url = reverse('start_certificate_regeneration', kwargs={'course_id': unicode(self.course.id)})
         response = self.client.post(url)
 

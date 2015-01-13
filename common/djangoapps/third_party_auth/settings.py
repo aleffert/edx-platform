@@ -37,6 +37,7 @@ def apply_settings(django_settings):
 
     # Inject our customized auth pipeline. All auth backends must work with
     # this pipeline.
+    # Sometimes an extra pipeline step will be added on startup for django-sudo, if enabled.
     django_settings.SOCIAL_AUTH_PIPELINE = (
         'third_party_auth.pipeline.parse_query_params',
         'social.pipeline.social_auth.social_details',
@@ -84,3 +85,15 @@ def apply_settings(django_settings):
         'social.apps.django_app.context_processors.backends',
         'social.apps.django_app.context_processors.login_redirect',
     )
+
+    set_strategy_getter()
+
+
+def set_strategy_getter():
+    """
+    Set strategy loader method to workaround current strategy getter needed on
+    get_user() method on authentication backends.
+    """
+    from social.strategies.utils import set_current_strategy_getter
+    from social.apps.django_app.utils import load_strategy
+    set_current_strategy_getter(load_strategy)

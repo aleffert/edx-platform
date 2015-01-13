@@ -36,6 +36,7 @@ from lms.envs.test import (
     # This is practically unused but needed by the oauth2_provider package, which
     # some tests in common/ rely on.
     OAUTH_OIDC_ISSUER,
+    SERVICE_VARIANT,
 )
 
 # mongo connection settings
@@ -281,3 +282,6 @@ FEATURES['ENABLE_TEAMS'] = True
 
 # Dummy secret key for dev/test
 SECRET_KEY = '85920908f28904ed733fe576320db18cabd7b6cd'
+
+######### Django-sudo ##########
+FEATURES['ENABLE_DJANGO_SUDO'] = True
