@@ -351,6 +351,9 @@ FEATURES = {
     # Dashboard search feature
     'ENABLE_DASHBOARD_SEARCH': False,
 
+    # Show new tabbed view for student dashboard
+    'ENABLE_TABBED_DASHBOARD': False,
+
     # log all information from cybersource callbacks
     'LOG_POSTPAY_CALLBACKS': True,
 

@@ -136,6 +136,9 @@ USE_I18N = True
 
 FEATURES['ENABLE_FEEDBACK_SUBMISSION'] = False
 
+# Show new tabbed view for student dashboard
+FEATURES['ENABLE_TABBED_DASHBOARD'] = True
+
 # Include the lettuce app for acceptance testing, including the 'harvest' django-admin command
 INSTALLED_APPS += ('lettuce.django',)
 LETTUCE_APPS = ('courseware', 'instructor')
