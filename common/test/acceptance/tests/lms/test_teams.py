@@ -1220,10 +1220,12 @@ class DeleteTeamTest(TeamFormActions):
         And the team should not be present
         """
         # If role is None, remain logged in as global staff
+        self.username = str(uuid4().hex)[:12]
         if role is not None:
             AutoAuthPage(
                 self.browser,
                 course_id=self.course_id,
+                username=self.username,
                 staff=False,
                 roles=role
             ).visit()
@@ -1252,7 +1254,9 @@ class DeleteTeamTest(TeamFormActions):
                 {
                     'event_type': 'edx.team.deleted',
                     'event': {
-                        'team_id': self.team['id']
+                        'team_id': self.team['id'],
+                        'username': self.username,
+
                     }
                 },
                 {
