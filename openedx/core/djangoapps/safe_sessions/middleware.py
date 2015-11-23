@@ -57,8 +57,7 @@ the entire cookie and use it to impersonate the victim.
 """
 
 from django.conf import settings
-from django.contrib.auth import SESSION_KEY
-from django.contrib.auth.views import redirect_to_login
+from django.contrib.auth import SESSION_KEY, logout
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import signing
 from django.utils.crypto import get_random_string
@@ -337,15 +336,17 @@ class SafeSessionMiddleware(SessionMiddleware):
 
         return response
 
-    @staticmethod
-    def _on_user_authentication_failed(request):
+    def _on_user_authentication_failed(self, request):
         """
         To be called when user authentication fails when processing
-        requests in the middleware. Sets a flag to delete the user's
-        cookie and redirects the user to the login page.
+        requests in the middleware. Logs out the user.
+        If the request does not have a session object already, it creates
+        a dummy one so that `logout`--which expects a session--
+        doesn't throw an error.
         """
-        _mark_cookie_for_deletion(request)
-        return redirect_to_login(request.path)
+        if not hasattr(request, 'session'):
+            request.session = self.SessionStore()
+        logout(request)
 
     @staticmethod
     def _verify_user(request, userid_in_session):
