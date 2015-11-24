@@ -354,12 +354,11 @@ class DiscussionTabSingleThreadPage(CoursePage):
         with self.thread_page._secondary_action_menu_open(".forum-thread-main-wrapper"):
             self._find_within(".forum-thread-main-wrapper .action-close").first.click()
 
-    @wait_for_js
-    def is_window_on_top(self):
+    def is_focus_changed(self, selector):
         """
-        Check if window's scroll is at top
+        Check if the focus changed
         """
-        return self.browser.execute_script("return $('html, body').offset().top") == 0
+        return self.browser.execute_script("return $('{}').is(':focus')".format(selector))
 
     def _thread_is_rendered_successfully(self, thread_id):
         return self.q(css=".discussion-article[data-id='{}']".format(thread_id)).visible
@@ -381,12 +380,12 @@ class DiscussionTabSingleThreadPage(CoursePage):
         """
         return len(self.q(css=".forum-nav-thread").results) == thread_count
 
-    def check_window_is_on_top(self):
+    def check_focus_changes(self, selector):
         """
-        Check window is on top of the page
+        Check focus changes
         """
         EmptyPromise(
-            self.is_window_on_top,
+            lambda: self.is_focus_changed(selector),
             "Window is on top"
         ).fulfill()
 
