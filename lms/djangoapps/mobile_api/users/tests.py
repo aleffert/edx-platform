@@ -85,8 +85,10 @@ class TestUserEnrollmentApi(UrlResetMixin, MobileAPITestCase, MobileAuthUserTest
         self.assertEqual(len(courses), 1)
 
         found_course = courses[0]['course']
-        self.assertTrue('video_outline' in found_course)
-        self.assertTrue('course_handouts' in found_course)
+        self.assertIn('courses/{}/about/'.format(self.course.id), found_course['course_about'])
+        self.assertIn('course_info/{}/updates'.format(self.course.id), found_course['course_updates'])
+        self.assertIn('course_info/{}/handouts'.format(self.course.id), found_course['course_handouts'])
+        self.assertIn('video_outlines/courses/{}'.format(self.course.id), found_course['video_outline'])
         self.assertEqual(found_course['id'], unicode(self.course.id))
         self.assertEqual(courses[0]['mode'], 'honor')
         self.assertEqual(courses[0]['course']['subscription_id'], self.course.clean_id(padding_char='_'))
@@ -384,7 +386,6 @@ class TestCourseEnrollmentSerializer(MobileAPITestCase):
         self.login_and_enroll()
 
         serialized = CourseEnrollmentSerializer(CourseEnrollment.enrollments_for_user(self.user)[0]).data
-        self.assertEqual(serialized['course']['video_outline'], None)
         self.assertEqual(serialized['course']['name'], self.course.display_name)
         self.assertEqual(serialized['course']['number'], self.course.id.course)
         self.assertEqual(serialized['course']['org'], self.course.id.org)

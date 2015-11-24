@@ -17,33 +17,6 @@ class CourseOverviewField(serializers.RelatedField):
 
     def to_representation(self, course_overview):
         course_id = unicode(course_overview.id)
-        request = self.context.get('request', None)
-        if request:
-            video_outline_url = reverse(
-                'video-summary-list',
-                kwargs={'course_id': course_id},
-                request=request
-            )
-            course_updates_url = reverse(
-                'course-updates-list',
-                kwargs={'course_id': course_id},
-                request=request
-            )
-            course_handouts_url = reverse(
-                'course-handouts-list',
-                kwargs={'course_id': course_id},
-                request=request
-            )
-            discussion_url = reverse(
-                'discussion_course',
-                kwargs={'course_id': course_id},
-                request=request
-            ) if course_overview.is_discussion_tab_enabled() else None
-        else:
-            video_outline_url = None
-            course_updates_url = None
-            course_handouts_url = None
-            discussion_url = None
 
         if course_overview.advertised_start is not None:
             start_type = "string"
@@ -55,7 +28,7 @@ class CourseOverviewField(serializers.RelatedField):
             start_type = "empty"
             start_display = None
 
-        return {
+        response_data = {
             "id": course_id,
             "name": course_overview.display_name,
             "number": course_overview.display_number_with_default,
@@ -65,19 +38,54 @@ class CourseOverviewField(serializers.RelatedField):
             "start_type": start_type,
             "end": course_overview.end,
             "course_image": course_overview.course_image_url,
+            "subscription_id": course_overview.clean_id(padding_char='_'),
+
+            # Note: The following 2 should be deprecated.
             "social_urls": {
                 "facebook": course_overview.facebook_url,
             },
             "latest_updates": {
                 "video": None
             },
-            "video_outline": video_outline_url,
-            "course_updates": course_updates_url,
-            "course_handouts": course_handouts_url,
-            "discussion_url": discussion_url,
-            "subscription_id": course_overview.clean_id(padding_char='_'),
-            "courseware_access": has_access(request.user, 'load_mobile', course_overview).to_json() if request else None
+
         }
+
+        request = self.context.get('request', None)
+        if request:
+            response_data['courseware_access'] = has_access(
+                request.user,
+                'load_mobile',
+                course_overview
+            ).to_json()
+
+            response_data['course_about'] = reverse(
+                'about_course',
+                kwargs={'course_id': course_id},
+                request=request,
+            )
+            response_data['course_updates'] = reverse(
+                'course-updates-list',
+                kwargs={'course_id': course_id},
+                request=request,
+            )
+            response_data['course_handouts'] = reverse(
+                'course-handouts-list',
+                kwargs={'course_id': course_id},
+                request=request,
+            )
+            if course_overview.is_discussion_tab_enabled():
+                response_data['discussion_url'] = reverse(
+                    'discussion_course',
+                    kwargs={'course_id': course_id},
+                    request=request,
+                )
+            response_data['video_outline'] = reverse(
+                'video-summary-list',
+                kwargs={'course_id': course_id},
+                request=request,
+            )
+
+        return response_data
 
 
 class CourseEnrollmentSerializer(serializers.ModelSerializer):
